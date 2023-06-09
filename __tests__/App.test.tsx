@@ -1,16 +1,31 @@
-import { assert, test } from 'vitest';
+import { test, vi } from 'vitest';
 import {render, screen} from '@testing-library/react'
 import App from '../src/App';
 import React from 'react';
+import axios from 'axios';
 
-test('sum', () => {
-  assert.equal(1 + 1, 2);
-})
+vi.mock('axios');
 
-test('app displays correct header', async () => {
-  render(<App />)
+describe('App component', () => {
+  beforeEach(() => {
+    vi.mocked(axios.get).mockReset();
+  });
 
-  const heading = await screen.findByRole('heading');
+  test('app displays correct header', async () => {
+    render(<App />);
+  
+    const heading = await screen.findByRole('heading');
+  
+    expect(heading).toHaveTextContent('Todos');
+  });
 
-  expect(heading).toHaveTextContent('Todos');
-})
+  test('app makes API call to todos endpoint', () => {
+    vi.mocked(axios.get).mockResolvedValue({
+      data: 'hello world'
+    })
+
+    render(<App />);
+
+    expect(axios.get).toHaveBeenCalledTimes(1);
+  })
+});
